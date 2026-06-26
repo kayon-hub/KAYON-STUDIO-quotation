@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAYON STUDIO 報價合約</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; font-size: 13px; color: #222; background: #f0f0f0; }
+  .page { width: 210mm; margin: 20px auto; padding: 20mm; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  @media print { body { background: #fff; } .page { box-shadow: none; margin: 0; padding: 15mm; } .no-print { display: none !important; } }
+
+  .header { text-align: center; margin-bottom: 18px; border-bottom: 3px double #333; padding-bottom: 12px; }
+  .header h1 { font-size: 22px; letter-spacing: 4px; margin-bottom: 4px; }
+  .header .subtitle { font-size: 11px; color: #666; }
+  .header .version { font-size: 11px; color: #c00; margin-top: 4px; font-weight: bold; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 14px; border: 1px solid #999; }
+  .info-grid .col { padding: 8px 12px; }
+  .info-grid .col:first-child { border-right: 1px solid #999; }
+  .info-grid .label { font-size: 11px; color: #666; margin-bottom: 2px; }
+  .info-grid .value { font-size: 13px; font-weight: 500; min-height: 20px; border-bottom: 1px dotted #aaa; padding: 2px 0; }
+  .info-grid .section-title { font-weight: bold; font-size: 13px; background: #f5f5f5; padding: 6px 12px; border-bottom: 1px solid #999; }
+
+  table.items { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  table.items th, table.items td { border: 1px solid #999; padding: 7px 10px; text-align: center; }
+  table.items th { background: #4a86c8; color: #fff; font-size: 12px; }
+  table.items td { font-size: 13px; }
+  table.items td.left { text-align: left; }
+  table.items .total-row { background: #f0f4fa; font-weight: bold; }
+  table.items td.price { text-align: right; font-family: monospace; font-size: 13px; }
+
+  .terms { margin-bottom: 16px; }
+  .terms h3 { font-size: 13px; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+  .terms ol { font-size: 10.5px; line-height: 1.75; padding-left: 18px; color: #333; }
+  .terms ol li { margin-bottom: 3px; }
+  .terms ol li strong { color: #222; }
+
+  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .payment-box { font-size: 11px; line-height: 1.8; background: #fafafa; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+  .payment-box .title { font-weight: bold; margin-bottom: 4px; }
+  .contractor { font-size: 11px; line-height: 1.7; margin-top: 10px; padding: 8px 10px; background: #fafafa; border: 1px solid #ddd; border-radius: 4px; }
+  .custom-notes { margin-top: 10px; }
+  .custom-notes .label { font-size: 11px; color: #666; margin-bottom: 4px; }
+
+  .sig-section { margin-top: 20px; page-break-inside: avoid; }
+  .sig-section h3 { font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+  .sig-agreement { font-size: 11px; color: #555; margin-bottom: 12px; }
+  .sig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .sig-block { border: 1px solid #ccc; padding: 12px; border-radius: 4px; }
+  .sig-block .sig-title { font-weight: bold; font-size: 13px; margin-bottom: 8px; text-align: center; }
+  .sig-content { display: flex; flex-direction: column; gap: 8px; }
+
+  .sig-pad-container { position: relative; }
+  canvas.sig-pad { border: 1px solid #ccc; border-radius: 4px; cursor: crosshair; width: 100%; height: 70px; background: #fff; display: block; touch-action: none; }
+  .sig-pad-container img.sig-preview { width: 100%; height: 70px; object-fit: contain; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: none; }
+  .sig-actions { margin-top: 4px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .sig-actions button, .sig-actions label { font-size: 11px; padding: 4px 10px; border: 1px solid #ccc; border-radius: 3px; background: #f9f9f9; cursor: pointer; }
+  .sig-actions button:hover, .sig-actions label:hover { background: #eee; }
+  .sig-actions .btn-clear { color: #c00; border-color: #c99; }
+  .sig-actions input[type="file"] { display: none; }
+
+  .seal-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 6px; }
+  .seal-box { border: 1px dashed #bbb; display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 10px; text-align: center; line-height: 1.3; background: #fcfcfc; position: relative; flex-shrink: 0; }
+  .seal-big { width: 90px; height: 90px; }
+  .seal-small { width: 60px; height: 60px; }
+  .seal-label { position: absolute; top: 2px; left: 3px; font-size: 8px; color: #ccc; }
+
+  .sig-date-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #444; }
+  .sig-date-row .date-value { border-bottom: 1px solid #aaa; min-width: 140px; padding: 2px 4px; min-height: 18px; }
+
+  .hash-section { margin-top: 16px; padding: 10px; background: #f8f8f8; border: 1px solid #ddd; border-radius: 4px; font-size: 10px; color: #666; line-height: 1.6; }
+  .hash-section .hash-value { font-family: monospace; word-break: break-all; color: #333; margin: 4px 0; }
+  .hash-section .seal-note { color: #999; font-style: italic; margin-top: 6px; }
+
+  .btn-finalize { display: block; margin: 20px auto; padding: 12px 40px; font-size: 15px; background: #4a86c8; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; letter-spacing: 2px; }
+  .btn-finalize:hover { background: #3a6fa8; }
+  .btn-finalize:disabled { background: #aaa; cursor: not-allowed; }
+  .btn-print { display: block; margin: 10px auto; padding: 8px 30px; font-size: 13px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
+
+  .mode-banner { text-align: center; padding: 8px; font-size: 12px; border-radius: 4px; margin-bottom: 12px; }
+  .mode-internal { background: #e8f4e8; color: #2a6e2a; border: 1px solid #a3d9a3; }
+  .mode-client { background: #fff3e0; color: #8a5c00; border: 1px solid #f0c36d; }
+  .mode-toggle { display: block; margin: 0 auto 10px; padding: 6px 20px; font-size: 12px; background: #f9f9f9; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
+  .mode-toggle:hover { background: #eee; }
+</style>
+</head>
+<body>
+
+<div class="no-print" style="width:210mm;margin:10px auto 0;">
+  <button class="mode-toggle" id="modeToggle" onclick="toggleMode()">切換為客戶檢視模式</button>
+</div>
+<div class="page" id="contract">
+  <div class="mode-banner no-print mode-internal" id="modeBanner">內部編輯模式 — 所有欄位皆可編輯</div>
+  <div class="header">
+    <img id="headerLogo"
+     src="kayonstudio_logonew.png"
+     alt="KAYON STUDIO"
+     style="width:100%;max-height:140px;height:auto;display:block;margin:0 auto 16px;">
+    <div class="subtitle" style="margin-top:4px;">報價合約 Quotation &amp; Service Agreement</div>
+  </div>
+
+  <div class="info-grid">
+    <div class="section-title">客戶資訊 Customer Info</div>
+    <div class="section-title">報價資訊 Quotation Info</div>
+    <div class="col">
+      <div class="label">客戶名稱</div>
+      <div class="value" contenteditable="true" id="customerName"></div>
+      <div class="label" style="margin-top:6px;">聯絡電話</div>
+      <div class="value" contenteditable="true" id="customerPhone"></div>
+      <div class="label" style="margin-top:6px;">Email</div>
+      <div class="value" contenteditable="true" id="customerEmail"></div>
+    </div>
+    <div class="col">
+      <div class="label">報價日期</div>
+      <div class="value" id="quoteDate"></div>
+      <div class="label" style="margin-top:6px;">報價編號</div>
+      <div class="value" id="quoteNo"></div>
+      <div class="label" style="margin-top:6px;">專案類型</div>
+      <div class="value" id="projectType"></div>
+    </div>
+  </div>
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th style="width:30%">項目</th>
+        <th style="width:26%">內容</th>
+        <th style="width:14%">單價 (NTD)</th>
+        <th style="width:10%">數量</th>
+        <th style="width:16%">小計 (NTD)</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody">
+      <tr>
+        <td><select class="item-select" data-row="1"><option value="">-- 選擇項目 --</option></select><input type="text" class="custom-item-name" id="customName1" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;margin-top:4px;" placeholder="輸入項目名稱"></td>
+        <td class="left"><span class="item-desc" id="desc1"></span><input type="text" class="custom-desc" id="customDesc1" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;" placeholder="輸入內容說明"></td>
+        <td class="price" id="price1"><input type="number" class="custom-price" id="customPrice1" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
+        <td><input type="number" min="1" class="qty-input" data-row="1" style="width:50px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;"></td>
+        <td class="price" id="sub1"></td>
+      </tr>
+      <tr>
+        <td><select class="item-select" data-row="2"><option value="">-- 選擇項目 --</option></select><input type="text" class="custom-item-name" id="customName2" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;margin-top:4px;" placeholder="輸入項目名稱"></td>
+        <td class="left"><span class="item-desc" id="desc2"></span><input type="text" class="custom-desc" id="customDesc2" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;" placeholder="輸入內容說明"></td>
+        <td class="price" id="price2"><input type="number" class="custom-price" id="customPrice2" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
+        <td><input type="number" min="1" class="qty-input" data-row="2" style="width:50px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;"></td>
+        <td class="price" id="sub2"></td>
+      </tr>
+      <tr>
+        <td><select class="item-select" data-row="3"><option value="">-- 選擇項目 --</option></select><input type="text" class="custom-item-name" id="customName3" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;margin-top:4px;" placeholder="輸入項目名稱"></td>
+        <td class="left"><span class="item-desc" id="desc3"></span><input type="text" class="custom-desc" id="customDesc3" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;" placeholder="輸入內容說明"></td>
+        <td class="price" id="price3"><input type="number" class="custom-price" id="customPrice3" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
+        <td><input type="number" min="1" class="qty-input" data-row="3" style="width:50px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;"></td>
+        <td class="price" id="sub3"></td>
+      </tr>
+      <tr>
+        <td><select class="item-select" data-row="4"><option value="">-- 選擇項目 --</option></select><input type="text" class="custom-item-name" id="customName4" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;margin-top:4px;" placeholder="輸入項目名稱"></td>
+        <td class="left"><span class="item-desc" id="desc4"></span><input type="text" class="custom-desc" id="customDesc4" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;" placeholder="輸入內容說明"></td>
+        <td class="price" id="price4"><input type="number" class="custom-price" id="customPrice4" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
+        <td><input type="number" min="1" class="qty-input" data-row="4" style="width:50px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;"></td>
+        <td class="price" id="sub4"></td>
+      </tr>
+      <tr class="total-row">
+        <td colspan="4" style="text-align:right;font-size:14px;">總計 Total</td>
+        <td class="price" id="totalAmount" style="font-size:15px;">$0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="terms">
+    <h3>合約條款 Terms &amp; Conditions</h3>
+    <ol>
+      <li><strong>製作流程｜</strong>確認需求 → 簽署本合約 → 支付訂金50% → 製作 → 初稿交付（可修改2次）→ 定稿 → 支付尾款 → 交付完整檔案。</li>
+      <li><strong>付款條件｜</strong>簽約後兩個工作日內支付訂金（總額50%），尾款於定稿確認後、完整檔案交付前支付。逾期未付款，我方得暫停製作。</li>
+      <li><strong>修改與驗收｜</strong>製作方向經雙方確認後即定案，後續僅接受合理範圍內之微調（如音量、細節修飾等），不接受大幅更改方向、風格或重新製作。初稿提供免費微調2次，第三次起每次加收總額10%。定稿交付後3個工作日內未提出異議，視為驗收完成。</li>
+      <li><strong>取消與退款｜</strong>簽約後2個工作日內且製作未啟動，可申請取消並退還訂金50%。製作啟動後取消，訂金不予退還。</li>
+      <li><strong>智慧財產權｜</strong>成品著作財產權歸客戶所有；我方保有音樂著作人格權及作品集展示權。如需公開發行，客戶應自行取得相關授權。</li>
+      <li><strong>素材責任｜</strong>客戶提供之素材若涉及第三方版權、肖像權或其他權利爭議，責任由客戶自負，與我方無涉。</li>
+      <li><strong>保密義務｜</strong>雙方對本合約內容及製作過程中知悉之商業資訊負有保密義務，未經對方書面同意不得對外揭露。</li>
+      <li><strong>不可抗力｜</strong>因天災、疫情、政府法令變更等不可抗力因素導致無法履約，雙方互不負違約責任，得協商延期或解除合約。</li>
+      <li><strong>爭議處理｜</strong>本合約如有爭議，雙方應先協商解決；協商不成，合意以臺灣新竹地方法院為第一審管轄法院。</li>
+      <li><strong>報價效期｜</strong>本報價合約自開立日起7個日曆天內有效，逾期未簽署則報價失效，需重新報價。標示「起」之品項，我方得依製作複雜程度另行報價。</li>
+      <li><strong>合約效力｜</strong>本合約自雙方簽署後即刻生效，至雙方義務履行完畢為止。</li>
+    </ol>
+  </div>
+
+  <div class="bottom-grid">
+    <div>
+      <div class="payment-box">
+        <div class="title">匯款資訊 Payment</div>
+        銀行｜國泰世華銀行 (013) 竹城分行<br>
+        戶名｜洪曜騏<br>
+        帳號｜2105-0630-7630
+      </div>
+      <div class="custom-notes">
+        <div class="label">特殊備註（業務填寫）</div>
+        <textarea id="customNotes" style="width:100%;height:50px;border:1px solid #ccc;border-radius:4px;padding:6px;font-size:11px;resize:vertical;" placeholder="如有特殊需求或折扣授權，請註明於此..."></textarea>
+      </div>
+    </div>
+    <div>
+      <div class="contractor">
+        <strong>承接方資訊 Contractor Info</strong><br>
+        鎧洋聲影科技工作室　統編：61210989<br>
+        電話｜03-6219005<br>
+        Email｜kayon@karbonxgaiaentertainment.com<br>
+        地址｜新竹市北大路307號9F-3
+      </div>
+    </div>
+  </div>
+
+  <div class="sig-section">
+    <h3>簽署 Signatures</h3>
+    <div class="sig-agreement" style="font-size:9px;">本報價合約確認即視為同意以上所有條款，雙方簽署後即刻生效。如有任何不清楚或尚未確認之事項，請於簽署前與我方聯繫。</div>
+    <div class="sig-row">
+      <div class="sig-block">
+        <div class="sig-title">客戶簽署 Customer Signature</div>
+        <div class="sig-content">
+          <div class="sig-pad-container">
+            <canvas class="sig-pad" id="sigCustomer"></canvas>
+            <img class="sig-preview" id="sigCustomerPreview">
+          </div>
+          <div class="sig-actions no-print">
+            <button class="btn-clear" onclick="clearSig('Customer')">清除重簽</button>
+            <label>上傳簽名 <input type="file" accept="image/*" onchange="uploadSig(event,'Customer')"></label>
+          </div>
+          <div class="seal-row">
+            <div class="seal-box seal-big" style="position:relative;overflow:hidden;">
+              <img class="seal-preview" style="display:none;width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;">
+              <span class="seal-placeholder">大章<br><span style="font-size:9px;color:#ccc;">若無則以<br>簽名為主</span></span>
+              <label class="seal-upload no-print" style="position:absolute;bottom:2px;right:2px;font-size:8px;color:#999;cursor:pointer;background:rgba(255,255,255,.8);padding:1px 4px;border-radius:2px;">上傳<input type="file" accept="image/*" style="display:none;" onchange="uploadSeal(event,this)"></label>
+            </div>
+            <div class="seal-box seal-small" style="position:relative;overflow:hidden;">
+              <img class="seal-preview" style="display:none;width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;">
+              <span class="seal-placeholder">小章<br><span style="font-size:9px;color:#ccc;">若無則以<br>簽名為主</span></span>
+              <label class="seal-upload no-print" style="position:absolute;bottom:2px;right:2px;font-size:8px;color:#999;cursor:pointer;background:rgba(255,255,255,.8);padding:1px 4px;border-radius:2px;">上傳<input type="file" accept="image/*" style="display:none;" onchange="uploadSeal(event,this)"></label>
+            </div>
+          </div>
+          <div class="sig-date-row">
+            <span>日期：</span>
+            <span class="date-value" id="sigCustomerDate"></span>
+          </div>
+        </div>
+      </div>
+      <div class="sig-block">
+        <div class="sig-title">KAYON STUDIO 簽署 Authorized Signature</div>
+        <div class="sig-content">
+          <div class="sig-pad-container">
+            <canvas class="sig-pad" id="sigKayon"></canvas>
+            <img class="sig-preview" id="sigKayonPreview">
+          </div>
+          <div class="sig-actions no-print">
+            <button class="btn-clear" onclick="clearSig('Kayon')">清除重簽</button>
+            <label>上傳簽名 <input type="file" accept="image/*" onchange="uploadSig(event,'Kayon')"></label>
+          </div>
+          <div class="seal-row">
+            <div class="seal-box seal-big" style="position:relative;overflow:hidden;">
+              <img class="seal-preview" style="display:none;width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;">
+              <span class="seal-placeholder">大章<br><span style="font-size:9px;color:#ccc;">若無則以<br>簽名為主</span></span>
+              <label class="seal-upload no-print" style="position:absolute;bottom:2px;right:2px;font-size:8px;color:#999;cursor:pointer;background:rgba(255,255,255,.8);padding:1px 4px;border-radius:2px;">上傳<input type="file" accept="image/*" style="display:none;" onchange="uploadSeal(event,this)"></label>
+            </div>
+            <div class="seal-box seal-small" style="position:relative;overflow:hidden;">
+              <img class="seal-preview" style="display:none;width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;">
+              <span class="seal-placeholder">小章<br><span style="font-size:9px;color:#ccc;">若無則以<br>簽名為主</span></span>
+              <label class="seal-upload no-print" style="position:absolute;bottom:2px;right:2px;font-size:8px;color:#999;cursor:pointer;background:rgba(255,255,255,.8);padding:1px 4px;border-radius:2px;">上傳<input type="file" accept="image/*" style="display:none;" onchange="uploadSeal(event,this)"></label>
+            </div>
+          </div>
+          <div class="sig-date-row">
+            <span>日期：</span>
+            <span class="date-value" id="sigKayonDate"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hash-section" id="hashSection" style="display:none;">
+    <strong>數位簽章驗證資訊 Digital Signature Verification</strong>
+    <div>文件 SHA-256 Hash：</div>
+    <div class="hash-value" id="docHash">-</div>
+    <div>UTC 時間戳記（Timestamp）：<span id="utcTimestamp">-</span></div>
+    <div class="seal-note">本文件已完成電子簽章與數位封印，簽署後任何修改都將使簽章失效。</div>
+  </div>
+
+  <div class="no-print" style="margin-top:20px;text-align:center;">
+    <button class="btn-finalize" id="btnFinalize" onclick="finalizeContract()">完成簽署並封印文件</button>
+    <button class="btn-print" onclick="window.print()">列印 / 輸出 PDF</button>
+  </div>
+</div>
+
+<script>
+const PRICE_LIST = [
+  { category: "音樂製作", item: "原創歌曲製作（錄音室2HR）", price: 17000, desc: "含人聲錄製修飾、混音母帶、贈2張NFC專輯" },
+  { category: "音樂製作", item: "原創歌曲製作（不進錄音室）", price: 10000, desc: "編曲＋混音母帶，不含錄音、贈2張NFC專輯" },
+  { category: "音樂製作", item: "配樂製作", price: 8000, desc: "依製作複雜度另外報價", isMin: true },
+  { category: "Podcast", item: "Podcast 聲音製作-15分鐘", price: 1000, desc: "含剪輯、降噪、音量平衡、片頭片尾及配樂製作" },
+  { category: "Podcast", item: "Podcast 聲音製作-20分鐘", price: 1500, desc: "含剪輯、降噪、音量平衡、片頭片尾及配樂製作" },
+  { category: "Podcast", item: "Podcast 聲音製作-25分鐘", price: 2000, desc: "含剪輯、降噪、音量平衡、片頭片尾及配樂製作" },
+  { category: "Podcast", item: "Podcast 聲音製作-每多5分鐘加收", price: 500, desc: "超出25分鐘之加收費用" },
+  { category: "影像製作", item: "MV製作-靜態", price: 5000, desc: "靜態圖文影像，含字幕與轉場效果" },
+  { category: "影像製作", item: "MV製作-動態", price: 15000, desc: "含實地拍攝＋後製剪輯，最長5分鐘" },
+  { category: "教育課程", item: "一對一音樂創作課-單堂", price: 4200, desc: "一對一教學，含作業批改與回饋" },
+  { category: "教育課程", item: "一對一音樂創作課-4堂套裝", price: 8000, desc: "買三期贈一堂，須於一個月內使用" },
+  { category: "周邊商品", item: "NFC實體專輯（加購）", price: 180, desc: "超出贈送數量之加購單價" },
+  { category: "", item: "自訂項目", price: 0, desc: "", isCustom: true }
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+  const now = new Date();
+  const twDate = now.toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" });
+  document.getElementById("quoteDate").textContent = twDate;
+  document.getElementById("quoteNo").textContent = "KS-" + now.getFullYear() + String(now.getMonth()+1).padStart(2,"0") + String(now.getDate()).padStart(2,"0") + "-" + String(Math.floor(Math.random()*900)+100);
+
+  document.querySelectorAll(".item-select").forEach(sel => {
+    PRICE_LIST.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.item;
+      opt.textContent = p.item;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener("change", onItemSelect);
+  });
+  document.querySelectorAll(".qty-input").forEach(inp => {
+    inp.addEventListener("input", onQtyChange);
+  });
+
+  initSignaturePad("Customer");
+  initSignaturePad("Kayon");
+});
+
+function onItemSelect(e) {
+  const row = e.target.dataset.row;
+  const selected = e.target.value;
+  const data = PRICE_LIST.find(p => p.item === selected);
+
+  const customName = document.getElementById("customName" + row);
+  const customDesc = document.getElementById("customDesc" + row);
+  const customPrice = document.getElementById("customPrice" + row);
+  const descSpan = document.getElementById("desc" + row);
+  const priceCell = document.getElementById("price" + row);
+
+  if (data && data.isCustom) {
+    customName.style.display = "block";
+    customDesc.style.display = "block";
+    customPrice.style.display = "block";
+    descSpan.style.display = "none";
+    priceCell.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = ""; });
+    priceCell.dataset.value = "";
+    customPrice.addEventListener("input", function() {
+      priceCell.dataset.value = this.value;
+      recalcRow(row);
+      recalcTotal();
+    });
+    recalcRow(row);
+  } else {
+    customName.style.display = "none";
+    customDesc.style.display = "none";
+    customPrice.style.display = "none";
+    descSpan.style.display = "";
+    if (data) {
+      const priceText = data.isMin ? "$" + data.price.toLocaleString() + " 起" : "$" + data.price.toLocaleString();
+      priceCell.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = priceText; });
+      priceCell.dataset.value = data.price;
+      descSpan.textContent = data.desc;
+      recalcRow(row);
+    } else {
+      priceCell.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = ""; });
+      priceCell.dataset.value = "";
+      descSpan.textContent = "";
+      document.getElementById("sub" + row).textContent = "";
+    }
+  }
+  recalcTotal();
+  updateProjectType();
+}
+
+function updateProjectType() {
+  const categories = new Set();
+  document.querySelectorAll(".item-select").forEach(sel => {
+    const data = PRICE_LIST.find(p => p.item === sel.value);
+    if (data) categories.add(data.category);
+  });
+  document.getElementById("projectType").textContent = categories.size > 0 ? Array.from(categories).join("、") : "";
+}
+
+function onQtyChange(e) {
+  recalcRow(e.target.dataset.row);
+  recalcTotal();
+}
+
+function recalcRow(row) {
+  const price = parseInt(document.getElementById("price" + row).dataset.value) || 0;
+  const qty = parseInt(document.querySelector(`.qty-input[data-row="${row}"]`).value) || 0;
+  const sub = price * qty;
+  document.getElementById("sub" + row).textContent = sub > 0 ? "$" + sub.toLocaleString() : "";
+  document.getElementById("sub" + row).dataset.value = sub;
+}
+
+function recalcTotal() {
+  let total = 0;
+  for (let i = 1; i <= 4; i++) {
+    total += parseInt(document.getElementById("sub" + i).dataset.value) || 0;
+  }
+  document.getElementById("totalAmount").textContent = "$" + total.toLocaleString();
+}
+
+const sigData = { Customer: null, Kayon: null };
+
+function initSignaturePad(who) {
+  const canvas = document.getElementById("sig" + who);
+  const ctx = canvas.getContext("2d");
+  let drawing = false;
+  let lastX, lastY;
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.strokeStyle = "#222";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+
+  function start(e) { e.preventDefault(); drawing = true; const pos = getPos(e); lastX = pos.x; lastY = pos.y; ctx.beginPath(); ctx.moveTo(lastX, lastY); }
+  function move(e) { if (!drawing) return; e.preventDefault(); const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); lastX = pos.x; lastY = pos.y; }
+  function end() { if (!drawing) return; drawing = false; sigData[who] = canvas.toDataURL("image/png"); }
+
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", move);
+  canvas.addEventListener("mouseup", end);
+  canvas.addEventListener("mouseleave", end);
+  canvas.addEventListener("touchstart", start, { passive: false });
+  canvas.addEventListener("touchmove", move, { passive: false });
+  canvas.addEventListener("touchend", end);
+}
+
+function clearSig(who) {
+  const canvas = document.getElementById("sig" + who);
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  sigData[who] = null;
+  canvas.style.display = "block";
+  const preview = document.getElementById("sig" + who + "Preview");
+  preview.style.display = "none";
+  preview.src = "";
+  document.getElementById("sig" + who + "Date").textContent = "";
+}
+
+function uploadSeal(e, labelEl) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const box = labelEl.closest(".seal-box");
+  const preview = box.querySelector(".seal-preview");
+  const placeholder = box.querySelector(".seal-placeholder");
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    preview.src = ev.target.result;
+    preview.style.display = "block";
+    placeholder.style.display = "none";
+  };
+  reader.readAsDataURL(file);
+}
+
+function uploadSig(e, who) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    sigData[who] = ev.target.result;
+    document.getElementById("sig" + who).style.display = "none";
+    const preview = document.getElementById("sig" + who + "Preview");
+    preview.src = ev.target.result;
+    preview.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+}
+
+let isClientMode = false;
+
+function toggleMode() {
+  isClientMode = !isClientMode;
+  const banner = document.getElementById("modeBanner");
+  const btn = document.getElementById("modeToggle");
+
+  if (isClientMode) {
+    banner.className = "mode-banner no-print mode-client";
+    banner.textContent = "客戶檢視模式 — 客戶僅可簽名，如有疑問請與我方聯繫";
+    btn.textContent = "切換為內部編輯模式";
+    lockForClient();
+  } else {
+    banner.className = "mode-banner no-print mode-internal";
+    banner.textContent = "內部編輯模式 — 所有欄位皆可編輯";
+    btn.textContent = "切換為客戶檢視模式";
+    unlockForInternal();
+  }
+}
+
+function lockForClient() {
+  document.querySelectorAll(".item-select, .qty-input, .custom-item-name, .custom-desc, .custom-price").forEach(el => {
+    el.disabled = true;
+    el.style.pointerEvents = "none";
+    el.style.opacity = "0.7";
+  });
+  document.querySelectorAll("[contenteditable]").forEach(el => {
+    el.setAttribute("contenteditable", "false");
+  });
+  const notes = document.getElementById("customNotes");
+  if (notes) { notes.disabled = true; notes.style.pointerEvents = "none"; notes.style.opacity = "0.7"; }
+
+  // Lock KAYON signature area
+  const kayonActions = document.querySelector("#sigKayon")?.closest(".sig-block")?.querySelectorAll(".sig-actions button, .sig-actions label");
+  kayonActions?.forEach(el => { el.style.pointerEvents = "none"; el.style.opacity = "0.3"; });
+  const kayonCanvas = document.getElementById("sigKayon");
+  if (kayonCanvas) { kayonCanvas.style.pointerEvents = "none"; }
+  // Lock KAYON seals
+  const kayonBlock = document.getElementById("sigKayon")?.closest(".sig-block");
+  kayonBlock?.querySelectorAll(".seal-upload").forEach(el => { el.style.pointerEvents = "none"; el.style.opacity = "0.3"; });
+}
+
+function unlockForInternal() {
+  document.querySelectorAll(".item-select, .qty-input, .custom-item-name, .custom-desc, .custom-price").forEach(el => {
+    el.disabled = false;
+    el.style.pointerEvents = "";
+    el.style.opacity = "";
+  });
+  document.querySelectorAll("[contenteditable=false]").forEach(el => {
+    el.setAttribute("contenteditable", "true");
+  });
+  const notes = document.getElementById("customNotes");
+  if (notes) { notes.disabled = false; notes.style.pointerEvents = ""; notes.style.opacity = ""; }
+
+  const kayonActions = document.querySelector("#sigKayon")?.closest(".sig-block")?.querySelectorAll(".sig-actions button, .sig-actions label");
+  kayonActions?.forEach(el => { el.style.pointerEvents = ""; el.style.opacity = ""; });
+  const kayonCanvas = document.getElementById("sigKayon");
+  if (kayonCanvas) { kayonCanvas.style.pointerEvents = ""; }
+  const kayonBlock = document.getElementById("sigKayon")?.closest(".sig-block");
+  kayonBlock?.querySelectorAll(".seal-upload").forEach(el => { el.style.pointerEvents = ""; el.style.opacity = ""; });
+}
+
+async function finalizeContract() {
+  if (!sigData.Customer && !sigData.Kayon) {
+    alert("請至少完成一方簽名後再封印文件。");
+    return;
+  }
+
+  const now = new Date();
+  const utc = now.toISOString();
+  const twTime = now.toLocaleString("zh-TW", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+
+  if (sigData.Customer) document.getElementById("sigCustomerDate").textContent = twTime;
+  if (sigData.Kayon) document.getElementById("sigKayonDate").textContent = twTime;
+
+  const contractText = document.getElementById("contract").innerText;
+  const sigConcat = (sigData.Customer || "") + (sigData.Kayon || "");
+  const payload = contractText + "|" + sigConcat + "|" + utc;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(payload);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+  document.getElementById("docHash").textContent = hashHex;
+  document.getElementById("utcTimestamp").textContent = utc;
+  document.getElementById("hashSection").style.display = "block";
+
+  document.querySelectorAll("select, input, textarea, [contenteditable]").forEach(el => {
+    el.disabled = true;
+    el.setAttribute("contenteditable", "false");
+    el.style.pointerEvents = "none";
+  });
+  document.querySelectorAll(".no-print button, .no-print label").forEach(el => {
+    el.disabled = true;
+    el.style.opacity = "0.3";
+    el.style.pointerEvents = "none";
+  });
+
+  document.getElementById("btnFinalize").textContent = "✅ 文件已封印";
+  document.getElementById("btnFinalize").disabled = true;
+
+  alert("✅ 文件已完成電子簽章與數位封印。\n\nSHA-256: " + hashHex.substring(0, 16) + "...\nUTC: " + utc + "\n\n簽署後任何修改都將使簽章失效。\n請列印或輸出 PDF 保存。");
+}
+</script>
+</body>
+</html>
