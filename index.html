@@ -823,8 +823,11 @@ function unlockForInternal() {
 }
 
 async function finalizeContract() {
-  if (!sigData.Customer && !sigData.Kayon) {
-    alert("請至少完成一方簽名後再封印文件。");
+  if (!sigData.Customer || !sigData.Kayon) {
+    const missing = [];
+    if (!sigData.Kayon) missing.push("KAYON STUDIO");
+    if (!sigData.Customer) missing.push("客戶");
+    alert("尚未完成簽署：" + missing.join("、") + "\n\n雙方皆須簽名後才能封印文件。");
     return;
   }
 
