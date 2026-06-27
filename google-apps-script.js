@@ -43,7 +43,7 @@ function doPost(e) {
         + '<hr style="border:none;border-top:1px solid #ddd;">'
         + '<p style="font-size:12px;color:#999;">'
         + '鎧洋聲影科技工作室 KAYON STUDIO<br>'
-        + '電話：03-6219005<br>'
+        + '電話：03-6129005<br>'
         + 'Email：kayon@karbonxgaiaentertainment.com</p></div>';
 
       data.recipients.forEach(function(email) {

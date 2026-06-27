@@ -202,6 +202,7 @@
       <li><strong>取消與退款｜</strong>簽約後2個工作日內且製作未啟動，可申請取消並退還訂金50%。製作啟動後取消，訂金不予退還。</li>
       <li><strong>智慧財產權｜</strong>成品著作財產權歸客戶所有；我方保有音樂著作人格權及作品集展示權。如需公開發行，客戶應自行取得相關授權。</li>
       <li><strong>素材責任｜</strong>客戶提供之素材若涉及第三方版權、肖像權或其他權利爭議，責任由客戶自負，與我方無涉。</li>
+      <li><strong>配樂與音檔聲明｜</strong>我方僅負責剪輯製作，不提供配樂素材。如需使用配樂，須由委託方自行提供並確保其音檔皆為合法取得（含正版素材庫授權、已取得公播或商用授權之音樂等）。如因委託方提供之音檔涉及著作權侵權，相關法律責任由委託方全數承擔。</li>
       <li><strong>保密義務｜</strong>雙方對本合約內容及製作過程中知悉之商業資訊負有保密義務，未經對方書面同意不得對外揭露。</li>
       <li><strong>不可抗力｜</strong>因天災、疫情、政府法令變更等不可抗力因素導致無法履約，雙方互不負違約責任，得協商延期或解除合約。</li>
       <li><strong>爭議處理｜</strong>本合約如有爭議，雙方應先協商解決；協商不成，合意以臺灣新竹地方法院為第一審管轄法院。</li>
@@ -227,7 +228,7 @@
       <div class="contractor">
         <strong>承接方資訊 Contractor Info</strong><br>
         鎧洋聲影科技工作室　統編：61210989<br>
-        電話｜03-6219005<br>
+        電話｜03-6129005<br>
         Email｜kayon@karbonxgaiaentertainment.com<br>
         地址｜新竹市北大路307號9F-3
       </div>
@@ -237,6 +238,12 @@
   <div class="sig-section">
     <h3>簽署 Signatures</h3>
     <div class="sig-agreement" style="font-size:9px;">本報價合約確認即視為同意以上所有條款，雙方簽署後即刻生效。如有任何不清楚或尚未確認之事項，請於簽署前與我方聯繫。</div>
+    <div style="margin-bottom:12px;padding:10px;background:#fff8e1;border:1px solid #f0c36d;border-radius:4px;">
+      <label style="font-size:11px;display:flex;align-items:flex-start;gap:8px;cursor:pointer;color:#333;">
+        <input type="checkbox" id="legalAudioConfirm" style="margin-top:2px;flex-shrink:0;">
+        <span>本人確認提供之音檔皆為合法素材庫取得或已取得合法授權，如因素材涉及著作權侵權，本人願負全部法律責任。</span>
+      </label>
+    </div>
     <div class="sig-row">
       <div class="sig-block">
         <div class="sig-title">客戶簽署 Customer Signature</div>
@@ -686,11 +693,7 @@ async function loadSavedData() {
       if (result.success) data = result.data;
     } catch (e) { console.error("Failed to load from server:", e); }
   }
-  if (!data) {
-    const raw = localStorage.getItem("ks_quotation");
-    if (!raw) return;
-    data = JSON.parse(raw);
-  }
+  if (!data) return;
   if (data.customerName) document.getElementById("customerName").textContent = data.customerName;
   if (data.customerPhone) document.getElementById("customerPhone").textContent = data.customerPhone;
   if (data.customerEmail) document.getElementById("customerEmail").textContent = data.customerEmail;
@@ -858,6 +861,10 @@ async function sealDocument() {
 }
 
 async function finalizeContract() {
+  if (!document.getElementById("legalAudioConfirm").checked) {
+    alert("請先勾選「音檔合法聲明」確認後才能封印文件。");
+    return;
+  }
   if (!sigData.Customer || !sigData.Kayon) {
     const missing = [];
     if (!sigData.Kayon) missing.push("KAYON STUDIO");
@@ -873,6 +880,10 @@ async function finalizeContract() {
 }
 
 async function clientSubmit() {
+  if (!document.getElementById("legalAudioConfirm").checked) {
+    alert("請先勾選「音檔合法聲明」確認後才能簽署送出。");
+    return;
+  }
   if (!sigData.Customer) {
     alert("請先在「客戶簽署」區域簽名後再送出。");
     return;
