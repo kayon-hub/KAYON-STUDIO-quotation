@@ -95,9 +95,11 @@
 </head>
 <body>
 
-<div class="no-print" style="width:210mm;margin:10px auto 0;display:flex;gap:8px;justify-content:center;">
+<div class="no-print" style="width:210mm;margin:10px auto 0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
   <button class="mode-toggle" id="modeToggle" onclick="toggleMode()">切換為客戶檢視模式</button>
   <button class="mode-toggle" id="btnCopyLink" onclick="copyClientLink()">複製客戶連結</button>
+  <button class="mode-toggle" onclick="saveData()" style="background:#e8f4e8;border-color:#a3d9a3;" id="btnSave">儲存報價單</button>
+  <button class="mode-toggle" onclick="clearSavedData()" style="color:#c00;border-color:#c99;">清除儲存</button>
 </div>
 <div class="page" id="contract">
   <div class="mode-banner no-print mode-internal" id="modeBanner">內部編輯模式 — 所有欄位皆可編輯</div>
@@ -349,6 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initSignaturePad("Customer");
   initSignaturePad("Kayon");
 
+  loadSavedData();
+
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("mode") === "client") {
     isClientMode = true;
@@ -592,6 +596,114 @@ function copyClientLink() {
       btn.style.borderColor = "";
     }, 2000);
   });
+}
+
+function saveData() {
+  const data = {
+    customerName: document.getElementById("customerName").textContent,
+    customerPhone: document.getElementById("customerPhone").textContent,
+    customerEmail: document.getElementById("customerEmail").textContent,
+    quoteDate: document.getElementById("quoteDate").textContent,
+    quoteNo: document.getElementById("quoteNo").textContent,
+    customNotes: document.getElementById("customNotes").value,
+    discount: document.getElementById("discountSelect").value,
+    customDiscount: document.getElementById("customDiscount").value,
+    rows: [],
+    sigCustomer: sigData.Customer,
+    sigKayon: sigData.Kayon,
+    seals: []
+  };
+  for (let i = 1; i <= 4; i++) {
+    data.rows.push({
+      item: document.querySelector(`.item-select[data-row="${i}"]`).value,
+      qty: document.querySelector(`.qty-input[data-row="${i}"]`).value,
+      customName: document.getElementById("customName" + i).value,
+      customDesc: document.getElementById("customDesc" + i).value,
+      customPrice: document.getElementById("customPrice" + i).value
+    });
+  }
+  document.querySelectorAll(".seal-box .seal-preview").forEach(img => {
+    data.seals.push(img.src && img.style.display !== "none" ? img.src : "");
+  });
+  localStorage.setItem("ks_quotation", JSON.stringify(data));
+  const btn = document.getElementById("btnSave");
+  btn.textContent = "已儲存！";
+  setTimeout(() => { btn.textContent = "儲存報價單"; }, 2000);
+}
+
+function loadSavedData() {
+  const raw = localStorage.getItem("ks_quotation");
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  if (data.customerName) document.getElementById("customerName").textContent = data.customerName;
+  if (data.customerPhone) document.getElementById("customerPhone").textContent = data.customerPhone;
+  if (data.customerEmail) document.getElementById("customerEmail").textContent = data.customerEmail;
+  if (data.quoteDate) document.getElementById("quoteDate").textContent = data.quoteDate;
+  if (data.quoteNo) document.getElementById("quoteNo").textContent = data.quoteNo;
+  if (data.customNotes) document.getElementById("customNotes").value = data.customNotes;
+  if (data.discount) {
+    document.getElementById("discountSelect").value = data.discount;
+    if (data.discount === "custom") {
+      document.getElementById("customDiscount").style.display = "block";
+      document.getElementById("customDiscount").value = data.customDiscount || "";
+    }
+  }
+  if (data.rows) {
+    data.rows.forEach((row, idx) => {
+      const i = idx + 1;
+      const sel = document.querySelector(`.item-select[data-row="${i}"]`);
+      if (row.item) {
+        sel.value = row.item;
+        sel.dispatchEvent(new Event("change"));
+      }
+      if (row.qty) {
+        const qtyInput = document.querySelector(`.qty-input[data-row="${i}"]`);
+        qtyInput.value = row.qty;
+        qtyInput.dispatchEvent(new Event("input"));
+      }
+      if (row.customName) document.getElementById("customName" + i).value = row.customName;
+      if (row.customDesc) document.getElementById("customDesc" + i).value = row.customDesc;
+      if (row.customPrice) {
+        document.getElementById("customPrice" + i).value = row.customPrice;
+        document.getElementById("customPrice" + i).dispatchEvent(new Event("input"));
+      }
+    });
+  }
+  if (data.sigCustomer) {
+    sigData.Customer = data.sigCustomer;
+    document.getElementById("sigCustomer").style.display = "none";
+    const preview = document.getElementById("sigCustomerPreview");
+    preview.src = data.sigCustomer;
+    preview.style.display = "block";
+  }
+  if (data.sigKayon) {
+    sigData.Kayon = data.sigKayon;
+    document.getElementById("sigKayon").style.display = "none";
+    const preview = document.getElementById("sigKayonPreview");
+    preview.src = data.sigKayon;
+    preview.style.display = "block";
+  }
+  if (data.seals) {
+    const sealBoxes = document.querySelectorAll(".seal-box");
+    data.seals.forEach((src, idx) => {
+      if (src && sealBoxes[idx]) {
+        const img = sealBoxes[idx].querySelector(".seal-preview");
+        const placeholder = sealBoxes[idx].querySelector(".seal-placeholder");
+        const uploadLabel = sealBoxes[idx].querySelector(".seal-upload");
+        img.src = src;
+        img.style.display = "block";
+        if (placeholder) placeholder.style.display = "none";
+        if (uploadLabel) uploadLabel.style.display = "none";
+      }
+    });
+  }
+  recalcTotal();
+}
+
+function clearSavedData() {
+  if (!confirm("確定要清除儲存的報價單資料嗎？")) return;
+  localStorage.removeItem("ks_quotation");
+  location.reload();
 }
 
 let isClientMode = false;
