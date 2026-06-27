@@ -168,40 +168,43 @@
       <tr>
         <td><select class="item-select" data-row="1"><option value="">-- 選擇項目 --</option></select><input type="text" class="custom-item-name" id="customName1" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;margin-top:4px;" placeholder="輸入項目名稱"></td>
         <td class="left"><span class="item-desc" id="desc1"></span><input type="text" class="custom-desc" id="customDesc1" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;" placeholder="輸入內容說明"></td>
-        <td class="price" id="price1"><input type="number" class="custom-price" id="customPrice1" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
+        <td class="price" id="price1"><span class="item-price" id="priceText1"></span><input type="number" class="custom-price" id="customPrice1" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
         <td><input type="number" min="1" class="qty-input" data-row="1" style="width:50px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;"></td>
         <td class="price" id="sub1"></td>
       </tr>
       <tr>
         <td><select class="item-select" data-row="2"><option value="">-- 選擇項目 --</option></select><input type="text" class="custom-item-name" id="customName2" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;margin-top:4px;" placeholder="輸入項目名稱"></td>
         <td class="left"><span class="item-desc" id="desc2"></span><input type="text" class="custom-desc" id="customDesc2" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;" placeholder="輸入內容說明"></td>
-        <td class="price" id="price2"><input type="number" class="custom-price" id="customPrice2" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
+        <td class="price" id="price2"><span class="item-price" id="priceText2"></span><input type="number" class="custom-price" id="customPrice2" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
         <td><input type="number" min="1" class="qty-input" data-row="2" style="width:50px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;"></td>
         <td class="price" id="sub2"></td>
       </tr>
       <tr>
         <td><select class="item-select" data-row="3"><option value="">-- 選擇項目 --</option></select><input type="text" class="custom-item-name" id="customName3" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;margin-top:4px;" placeholder="輸入項目名稱"></td>
         <td class="left"><span class="item-desc" id="desc3"></span><input type="text" class="custom-desc" id="customDesc3" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;" placeholder="輸入內容說明"></td>
-        <td class="price" id="price3"><input type="number" class="custom-price" id="customPrice3" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
+        <td class="price" id="price3"><span class="item-price" id="priceText3"></span><input type="number" class="custom-price" id="customPrice3" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
         <td><input type="number" min="1" class="qty-input" data-row="3" style="width:50px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;"></td>
         <td class="price" id="sub3"></td>
       </tr>
       <tr>
         <td><select class="item-select" data-row="4"><option value="">-- 選擇項目 --</option></select><input type="text" class="custom-item-name" id="customName4" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;margin-top:4px;" placeholder="輸入項目名稱"></td>
         <td class="left"><span class="item-desc" id="desc4"></span><input type="text" class="custom-desc" id="customDesc4" style="display:none;width:100%;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;" placeholder="輸入內容說明"></td>
-        <td class="price" id="price4"><input type="number" class="custom-price" id="customPrice4" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
+        <td class="price" id="price4"><span class="item-price" id="priceText4"></span><input type="number" class="custom-price" id="customPrice4" style="display:none;width:70px;border:1px solid #ccc;border-radius:3px;padding:4px;font-size:12px;text-align:right;" placeholder="金額"></td>
         <td><input type="number" min="1" class="qty-input" data-row="4" style="width:50px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;"></td>
         <td class="price" id="sub4"></td>
       </tr>
       <tr class="discount-row">
         <td colspan="4" style="text-align:right;font-weight:bold;">折扣 Discount</td>
         <td class="price">
-          <select id="discountSelect" onchange="recalcTotal()" style="padding:4px;width:120px;">
+          <select id="discountSelect" onchange="onDiscountChange()" style="padding:4px;width:120px;">
             <option value="1">無折扣</option>
+            <option value="0.95">95折（5% OFF）</option>
             <option value="0.9">9折（10% OFF）</option>
             <option value="0.85">85折（15% OFF）</option>
             <option value="0.8">8折（20% OFF）</option>
+            <option value="custom">自訂折扣</option>
           </select>
+          <input type="number" id="customDiscount" min="1" max="99" step="1" placeholder="例：75＝75折" style="display:none;width:70px;padding:4px;border:1px solid #ccc;border-radius:3px;font-size:12px;text-align:center;margin-top:4px;" oninput="recalcTotal()">
         </td>
       </tr>
       <tr class="total-row">
@@ -382,12 +385,14 @@ function onItemSelect(e) {
   const descSpan = document.getElementById("desc" + row);
   const priceCell = document.getElementById("price" + row);
 
+  const priceSpan = document.getElementById("priceText" + row);
+
   if (data && data.isCustom) {
     customName.style.display = "block";
     customDesc.style.display = "block";
     customPrice.style.display = "block";
     descSpan.style.display = "none";
-    priceCell.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = ""; });
+    priceSpan.textContent = "";
     priceCell.dataset.value = "";
     customPrice.addEventListener("input", function() {
       priceCell.dataset.value = this.value;
@@ -401,13 +406,12 @@ function onItemSelect(e) {
     customPrice.style.display = "none";
     descSpan.style.display = "";
     if (data) {
-      const priceText = data.isMin ? "$" + data.price.toLocaleString() + " 起" : "$" + data.price.toLocaleString();
-      priceCell.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = priceText; });
+      priceSpan.textContent = data.isMin ? "$" + data.price.toLocaleString() + " 起" : "$" + data.price.toLocaleString();
       priceCell.dataset.value = data.price;
       descSpan.textContent = data.desc;
       recalcRow(row);
     } else {
-      priceCell.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = ""; });
+      priceSpan.textContent = "";
       priceCell.dataset.value = "";
       descSpan.textContent = "";
       document.getElementById("sub" + row).textContent = "";
@@ -439,12 +443,31 @@ function recalcRow(row) {
   document.getElementById("sub" + row).dataset.value = sub;
 }
 
+function onDiscountChange() {
+  const sel = document.getElementById("discountSelect");
+  const customInput = document.getElementById("customDiscount");
+  if (sel.value === "custom") {
+    customInput.style.display = "block";
+    customInput.focus();
+  } else {
+    customInput.style.display = "none";
+  }
+  recalcTotal();
+}
+
 function recalcTotal() {
   let total = 0;
   for (let i = 1; i <= 4; i++) {
     total += parseInt(document.getElementById("sub" + i).dataset.value) || 0;
   }
-  const discount = parseFloat(document.getElementById("discountSelect").value);
+  const sel = document.getElementById("discountSelect");
+  let discount = 1;
+  if (sel.value === "custom") {
+    const val = parseInt(document.getElementById("customDiscount").value);
+    if (val > 0 && val <= 100) discount = val / 100;
+  } else {
+    discount = parseFloat(sel.value);
+  }
   total = Math.round(total * discount);
   document.getElementById("totalAmount").textContent = "$" + total.toLocaleString();
 }
@@ -552,7 +575,7 @@ function toggleMode() {
 }
 
 function lockForClient() {
-  document.querySelectorAll(".item-select, .qty-input, .custom-item-name, .custom-desc, .custom-price").forEach(el => {
+  document.querySelectorAll(".item-select, .qty-input, .custom-item-name, .custom-desc, .custom-price, #discountSelect, #customDiscount").forEach(el => {
     el.disabled = true;
     el.style.pointerEvents = "none";
     el.style.opacity = "0.7";
@@ -574,7 +597,7 @@ function lockForClient() {
 }
 
 function unlockForInternal() {
-  document.querySelectorAll(".item-select, .qty-input, .custom-item-name, .custom-desc, .custom-price").forEach(el => {
+  document.querySelectorAll(".item-select, .qty-input, .custom-item-name, .custom-desc, .custom-price, #discountSelect, #customDiscount").forEach(el => {
     el.disabled = false;
     el.style.pointerEvents = "";
     el.style.opacity = "";
