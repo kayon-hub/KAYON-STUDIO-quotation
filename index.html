@@ -10,42 +10,12 @@
   body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; font-size: 13px; color: #222; background: #f0f0f0; }
   .page { width: 210mm; margin: 20px auto; padding: 20mm; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
   @media print {
-    body { background: #fff; font-size: 9px !important; }
-    .page { box-shadow: none; margin: 0; padding: 0; width: 100%; }
+    body { background: #fff; }
+    .page { box-shadow: none; margin: 0; padding: 5mm; width: 100%; transform: scale(0.75); transform-origin: top center; }
     .no-print { display: none !important; }
-    .header { margin-bottom: 2px !important; padding-bottom: 2px !important; border-bottom-width: 1px !important; }
-    .header img { max-height: 40px !important; width: auto !important; margin-bottom: 2px !important; }
-    .header .subtitle { font-size: 8px !important; margin-top: 1px !important; }
-    .info-grid { margin-bottom: 4px !important; }
-    .info-grid .col { padding: 3px 6px !important; }
-    .info-grid .section-title { padding: 2px 6px !important; font-size: 9px !important; }
-    .info-grid .label { font-size: 8px !important; margin-bottom: 0 !important; margin-top: 2px !important; }
-    .info-grid .value { font-size: 9px !important; min-height: 12px !important; padding: 1px 0 !important; }
-    table.items { margin-bottom: 4px !important; }
-    table.items th, table.items td { padding: 2px 4px !important; font-size: 8.5px !important; }
-    .terms { margin-bottom: 4px !important; }
-    .terms h3 { font-size: 9px !important; margin-bottom: 2px !important; padding-bottom: 1px !important; }
-    .terms ol { font-size: 7px !important; line-height: 1.35 !important; padding-left: 12px !important; }
-    .terms ol li { margin-bottom: 0 !important; }
-    .bottom-grid { gap: 4px !important; margin-bottom: 4px !important; }
-    .payment-box { padding: 3px 5px !important; font-size: 8px !important; line-height: 1.4 !important; }
-    .payment-box .title { margin-bottom: 1px !important; }
-    .contractor { padding: 3px 5px !important; font-size: 8px !important; line-height: 1.4 !important; margin-top: 3px !important; }
     .custom-notes { display: none !important; }
-    .sig-section { margin-top: 4px !important; page-break-inside: avoid !important; }
-    .sig-section h3 { font-size: 9px !important; margin-bottom: 2px !important; padding-bottom: 1px !important; }
-    .sig-agreement { font-size: 7px !important; margin-bottom: 2px !important; }
-    .sig-row { gap: 8px !important; }
-    .sig-block { padding: 4px !important; }
-    .sig-block .sig-title { font-size: 9px !important; margin-bottom: 2px !important; }
-    .sig-content { gap: 2px !important; }
-    canvas.sig-pad, .sig-pad-container img.sig-preview { height: 30px !important; }
-    .seal-big { width: 40px !important; height: 40px !important; }
-    .seal-small { width: 28px !important; height: 28px !important; }
-    .seal-box { font-size: 7px !important; }
-    .seal-row { margin-top: 2px !important; gap: 4px !important; }
-    .sig-date-row { margin-top: 2px !important; font-size: 8px !important; }
-    .hash-section { margin-top: 4px !important; padding: 3px 5px !important; font-size: 7px !important; }
+    .header { margin-bottom: 6px !important; padding-bottom: 4px !important; }
+    .header img { max-height: 80px !important; margin-bottom: 4px !important; }
   }
 
   .header { text-align: center; margin-bottom: 18px; border-bottom: 3px double #333; padding-bottom: 12px; }
@@ -90,8 +60,8 @@
   .sig-content { display: flex; flex-direction: column; gap: 8px; }
 
   .sig-pad-container { position: relative; }
-  canvas.sig-pad { border: 1px solid #ccc; border-radius: 4px; cursor: crosshair; width: 100%; height: 70px; background: #fff; display: block; touch-action: none; }
-  .sig-pad-container img.sig-preview { width: 100%; height: 70px; object-fit: contain; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: none; }
+  canvas.sig-pad { border: 1px solid #ccc; border-radius: 4px; cursor: crosshair; width: 100%; height: 120px; background: #fff; display: block; touch-action: none; }
+  .sig-pad-container img.sig-preview { width: 100%; height: 120px; object-fit: contain; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: none; }
   .sig-actions { margin-top: 4px; display: flex; gap: 6px; flex-wrap: wrap; }
   .sig-actions button, .sig-actions label { font-size: 11px; padding: 4px 10px; border: 1px solid #ccc; border-radius: 3px; background: #f9f9f9; cursor: pointer; }
   .sig-actions button:hover, .sig-actions label:hover { background: #eee; }
@@ -483,21 +453,27 @@ function initSignaturePad(who) {
   const canvas = document.getElementById("sig" + who);
   const ctx = canvas.getContext("2d");
   let drawing = false;
-  let lastX, lastY;
+  let points = [];
+  let savedImageData = null;
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
+    const oldData = savedImageData;
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
-    ctx.strokeStyle = "#222";
-    ctx.lineWidth = 2;
+    if (oldData) ctx.putImageData(oldData, 0, 0);
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
   }
   resize();
-  window.addEventListener("resize", resize);
+  window.addEventListener("resize", () => {
+    savedImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    resize();
+  });
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -505,9 +481,41 @@ function initSignaturePad(who) {
     return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
   }
 
-  function start(e) { e.preventDefault(); drawing = true; const pos = getPos(e); lastX = pos.x; lastY = pos.y; ctx.beginPath(); ctx.moveTo(lastX, lastY); }
-  function move(e) { if (!drawing) return; e.preventDefault(); const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); lastX = pos.x; lastY = pos.y; }
-  function end() { if (!drawing) return; drawing = false; sigData[who] = canvas.toDataURL("image/png"); }
+  function start(e) {
+    e.preventDefault();
+    drawing = true;
+    points = [getPos(e)];
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+  }
+
+  function move(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    points.push(pos);
+    if (points.length >= 3) {
+      const l = points.length - 1;
+      const cx = (points[l - 1].x + points[l].x) / 2;
+      const cy = (points[l - 1].y + points[l].y) / 2;
+      ctx.quadraticCurveTo(points[l - 1].x, points[l - 1].y, cx, cy);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+    }
+  }
+
+  function end() {
+    if (!drawing) return;
+    drawing = false;
+    if (points.length > 0) {
+      const last = points[points.length - 1];
+      ctx.lineTo(last.x, last.y);
+      ctx.stroke();
+    }
+    points = [];
+    sigData[who] = canvas.toDataURL("image/png");
+  }
 
   canvas.addEventListener("mousedown", start);
   canvas.addEventListener("mousemove", move);
