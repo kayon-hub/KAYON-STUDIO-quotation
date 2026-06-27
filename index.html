@@ -114,6 +114,8 @@
     <div class="col">
       <div class="label">客戶名稱</div>
       <div class="value" contenteditable="true" id="customerName"></div>
+      <div class="label" style="margin-top:6px;">統一編號</div>
+      <div class="value" contenteditable="true" id="customerTaxId"></div>
       <div class="label" style="margin-top:6px;">聯絡電話</div>
       <div class="value" contenteditable="true" id="customerPhone"></div>
       <div class="label" style="margin-top:6px;">Email</div>
@@ -181,6 +183,12 @@
           </select>
           <input type="number" id="customDiscount" min="1" max="99" step="1" placeholder="例：75＝75折" style="display:none;width:70px;padding:4px;border:1px solid #ccc;border-radius:3px;font-size:12px;text-align:center;margin-top:4px;" oninput="recalcTotal()">
         </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="text-align:right;font-size:12px;">
+          <label style="cursor:pointer;"><input type="checkbox" id="invoiceCheck" onchange="recalcTotal()"> 需開立發票（外加 5% 營業稅）</label>
+        </td>
+        <td class="price" id="taxAmount" style="font-size:12px;color:#666;"></td>
       </tr>
       <tr class="total-row">
         <td colspan="4" style="text-align:right;font-weight:bold;">合計 Total</td>
@@ -472,6 +480,15 @@ function recalcTotal() {
     discount = parseFloat(sel.value);
   }
   total = Math.round(total * discount);
+  const invoiceCheck = document.getElementById("invoiceCheck");
+  const taxEl = document.getElementById("taxAmount");
+  if (invoiceCheck && invoiceCheck.checked) {
+    const tax = Math.round(total * 0.05);
+    taxEl.textContent = "+$" + tax.toLocaleString();
+    total += tax;
+  } else {
+    taxEl.textContent = "";
+  }
   document.getElementById("totalAmount").textContent = "$" + total.toLocaleString();
 }
 
@@ -604,9 +621,11 @@ function collectFormData() {
     customerEmail: document.getElementById("customerEmail").textContent,
     quoteDate: document.getElementById("quoteDate").textContent,
     quoteNo: document.getElementById("quoteNo").textContent,
+    customerTaxId: document.getElementById("customerTaxId").textContent,
     customNotes: document.getElementById("customNotes").value,
     discount: document.getElementById("discountSelect").value,
     customDiscount: document.getElementById("customDiscount").value,
+    invoice: document.getElementById("invoiceCheck").checked,
     rows: [],
     sigKayon: sigData.Kayon,
     seals: []
@@ -689,8 +708,10 @@ async function loadSavedData() {
   }
   if (!data) return;
   if (data.customerName) document.getElementById("customerName").textContent = data.customerName;
+  if (data.customerTaxId) document.getElementById("customerTaxId").textContent = data.customerTaxId;
   if (data.customerPhone) document.getElementById("customerPhone").textContent = data.customerPhone;
   if (data.customerEmail) document.getElementById("customerEmail").textContent = data.customerEmail;
+  if (data.invoice) document.getElementById("invoiceCheck").checked = true;
   if (data.quoteDate) document.getElementById("quoteDate").textContent = data.quoteDate;
   if (data.quoteNo) document.getElementById("quoteNo").textContent = data.quoteNo;
   if (data.customNotes) document.getElementById("customNotes").value = data.customNotes;
