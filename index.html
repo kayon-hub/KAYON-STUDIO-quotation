@@ -306,9 +306,21 @@
     <div class="seal-note">本文件已完成電子簽章與數位封印，簽署後任何修改都將使簽章失效。</div>
   </div>
 
-  <div class="no-print" style="margin-top:20px;text-align:center;">
+  <div class="no-print" style="margin-top:20px;text-align:center;" id="actionButtons">
     <button class="btn-finalize" id="btnFinalize" onclick="finalizeContract()">完成簽署並封印文件</button>
     <button class="btn-print" onclick="window.print()">列印 / 輸出 PDF</button>
+  </div>
+  <div class="no-print" style="margin-top:20px;text-align:center;display:none;" id="clientActions">
+    <button class="btn-finalize" id="btnClientSign" onclick="clientSubmit()">簽署送出</button>
+  </div>
+  <div class="no-print" style="margin-top:20px;text-align:center;display:none;" id="sealedActions">
+    <div style="background:#e8f4e8;border:1px solid #a3d9a3;border-radius:6px;padding:16px;margin-bottom:12px;max-width:500px;margin-left:auto;margin-right:auto;">
+      <div style="font-size:16px;font-weight:bold;margin-bottom:8px;">文件已封印完成</div>
+      <div style="font-size:12px;color:#555;margin-bottom:12px;">請儲存 PDF 後寄送副本給對方</div>
+      <button class="btn-print" onclick="window.print()" style="margin:6px;">儲存 PDF</button>
+      <button class="btn-print" id="btnMailKayon" onclick="" style="margin:6px;">寄給 KAYON STUDIO</button>
+      <button class="btn-print" id="btnMailClient" onclick="" style="margin:6px;">寄給客戶</button>
+    </div>
   </div>
 </div>
 
@@ -357,8 +369,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (urlParams.get("mode") === "client") {
     isClientMode = true;
     document.getElementById("modeBanner").className = "mode-banner no-print mode-client";
-    document.getElementById("modeBanner").textContent = "客戶檢視模式 — 客戶僅可簽名，如有疑問請與我方聯繫";
+    document.getElementById("modeBanner").textContent = "客戶檢視模式 — 請確認報價內容後於下方簽名送出";
     document.getElementById("modeToggle").style.display = "none";
+    document.getElementById("actionButtons").style.display = "none";
+    document.getElementById("clientActions").style.display = "block";
     lockForClient();
   }
 });
@@ -822,15 +836,7 @@ function unlockForInternal() {
   kayonBlock?.querySelectorAll(".seal-upload").forEach(el => { el.style.pointerEvents = ""; el.style.opacity = ""; });
 }
 
-async function finalizeContract() {
-  if (!sigData.Customer || !sigData.Kayon) {
-    const missing = [];
-    if (!sigData.Kayon) missing.push("KAYON STUDIO");
-    if (!sigData.Customer) missing.push("客戶");
-    alert("尚未完成簽署：" + missing.join("、") + "\n\n雙方皆須簽名後才能封印文件。");
-    return;
-  }
-
+async function sealDocument() {
   const now = new Date();
   const utc = now.toISOString();
   const twTime = now.toLocaleString("zh-TW", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
@@ -856,16 +862,62 @@ async function finalizeContract() {
     el.setAttribute("contenteditable", "false");
     el.style.pointerEvents = "none";
   });
-  document.querySelectorAll(".no-print button, .no-print label").forEach(el => {
-    el.disabled = true;
-    el.style.opacity = "0.3";
-    el.style.pointerEvents = "none";
-  });
+  document.querySelectorAll("canvas.sig-pad").forEach(c => { c.style.pointerEvents = "none"; });
+  document.querySelectorAll(".sig-actions").forEach(el => { el.style.display = "none"; });
+  document.querySelectorAll(".seal-upload").forEach(el => { el.style.display = "none"; });
 
-  document.getElementById("btnFinalize").textContent = "✅ 文件已封印";
+  return { hashHex, utc };
+}
+
+async function finalizeContract() {
+  if (!sigData.Customer || !sigData.Kayon) {
+    const missing = [];
+    if (!sigData.Kayon) missing.push("KAYON STUDIO");
+    if (!sigData.Customer) missing.push("客戶");
+    alert("尚未完成簽署：" + missing.join("、") + "\n\n雙方皆須簽名後才能封印文件。");
+    return;
+  }
+  const { hashHex, utc } = await sealDocument();
+  document.getElementById("btnFinalize").textContent = "文件已封印";
   document.getElementById("btnFinalize").disabled = true;
+  document.getElementById("btnFinalize").style.pointerEvents = "none";
+  showSealedActions();
+  alert("文件已完成電子簽章與數位封印。\n\nSHA-256: " + hashHex.substring(0, 16) + "...\nUTC: " + utc + "\n\n請儲存 PDF 並寄送副本。");
+}
 
-  alert("✅ 文件已完成電子簽章與數位封印。\n\nSHA-256: " + hashHex.substring(0, 16) + "...\nUTC: " + utc + "\n\n簽署後任何修改都將使簽章失效。\n請列印或輸出 PDF 保存。");
+async function clientSubmit() {
+  if (!sigData.Customer) {
+    alert("請先在「客戶簽署」區域簽名後再送出。");
+    return;
+  }
+  const { hashHex, utc } = await sealDocument();
+  document.getElementById("clientActions").style.display = "none";
+  showSealedActions();
+  alert("感謝您的簽署！文件已完成封印。\n\n請儲存 PDF 作為您的合約副本。");
+  window.print();
+}
+
+function showSealedActions() {
+  document.getElementById("actionButtons").style.display = "none";
+  document.getElementById("clientActions").style.display = "none";
+  document.getElementById("sealedActions").style.display = "block";
+
+  const quoteNo = document.getElementById("quoteNo").textContent;
+  const customerName = document.getElementById("customerName").textContent || "客戶";
+  const customerEmail = document.getElementById("customerEmail").textContent || "";
+  const subject = encodeURIComponent("KAYON STUDIO 報價合約 " + quoteNo);
+  const body = encodeURIComponent("您好，\n\n附件為報價合約（" + quoteNo + "）的已簽署 PDF 副本。\n請查收，謝謝。\n\nKAYON STUDIO\n鎧洋聲影科技工作室");
+
+  document.getElementById("btnMailKayon").onclick = function() {
+    window.open("mailto:kayon@karbonxgaiaentertainment.com?subject=" + subject + "&body=" + body);
+  };
+  if (customerEmail) {
+    document.getElementById("btnMailClient").onclick = function() {
+      window.open("mailto:" + encodeURIComponent(customerEmail) + "?subject=" + subject + "&body=" + body);
+    };
+  } else {
+    document.getElementById("btnMailClient").style.display = "none";
+  }
 }
 </script>
 </body>
