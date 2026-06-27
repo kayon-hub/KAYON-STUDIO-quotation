@@ -553,11 +553,13 @@ function uploadSeal(e, labelEl) {
   const box = labelEl.closest(".seal-box");
   const preview = box.querySelector(".seal-preview");
   const placeholder = box.querySelector(".seal-placeholder");
+  const uploadLabel = box.querySelector(".seal-upload");
   const reader = new FileReader();
   reader.onload = function(ev) {
     preview.src = ev.target.result;
     preview.style.display = "block";
     placeholder.style.display = "none";
+    if (uploadLabel) uploadLabel.style.display = "none";
   };
   reader.readAsDataURL(file);
 }
