@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KAYON STUDIO 報價合約</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 <style>
   @page { size: A4; margin: 6mm 8mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -315,11 +316,9 @@
   </div>
   <div class="no-print" style="margin-top:20px;text-align:center;display:none;" id="sealedActions">
     <div style="background:#e8f4e8;border:1px solid #a3d9a3;border-radius:6px;padding:16px;margin-bottom:12px;max-width:500px;margin-left:auto;margin-right:auto;">
-      <div style="font-size:16px;font-weight:bold;margin-bottom:8px;">文件已封印完成</div>
-      <div style="font-size:12px;color:#555;margin-bottom:12px;">請儲存 PDF 後寄送副本給對方</div>
-      <button class="btn-print" onclick="window.print()" style="margin:6px;">儲存 PDF</button>
-      <button class="btn-print" id="btnMailKayon" onclick="" style="margin:6px;">寄給 KAYON STUDIO</button>
-      <button class="btn-print" id="btnMailClient" onclick="" style="margin:6px;">寄給客戶</button>
+      <div style="font-size:16px;font-weight:bold;margin-bottom:8px;" id="sealedTitle">文件封印中，正在寄送...</div>
+      <div style="font-size:12px;color:#555;margin-bottom:12px;" id="sealedStatus">正在產生 PDF 並寄送至雙方信箱</div>
+      <button class="btn-print" onclick="window.print()" style="margin:6px;">手動儲存 PDF</button>
     </div>
   </div>
 </div>
@@ -881,8 +880,7 @@ async function finalizeContract() {
   document.getElementById("btnFinalize").textContent = "文件已封印";
   document.getElementById("btnFinalize").disabled = true;
   document.getElementById("btnFinalize").style.pointerEvents = "none";
-  showSealedActions();
-  alert("文件已完成電子簽章與數位封印。\n\nSHA-256: " + hashHex.substring(0, 16) + "...\nUTC: " + utc + "\n\n請儲存 PDF 並寄送副本。");
+  await showSealedActions();
 }
 
 async function clientSubmit() {
@@ -892,12 +890,12 @@ async function clientSubmit() {
   }
   const { hashHex, utc } = await sealDocument();
   document.getElementById("clientActions").style.display = "none";
-  showSealedActions();
-  alert("感謝您的簽署！文件已完成封印。\n\n請儲存 PDF 作為您的合約副本。");
-  window.print();
+  await showSealedActions();
 }
 
-function showSealedActions() {
+const APPS_SCRIPT_URL = "";
+
+async function showSealedActions() {
   document.getElementById("actionButtons").style.display = "none";
   document.getElementById("clientActions").style.display = "none";
   document.getElementById("sealedActions").style.display = "block";
@@ -905,18 +903,55 @@ function showSealedActions() {
   const quoteNo = document.getElementById("quoteNo").textContent;
   const customerName = document.getElementById("customerName").textContent || "客戶";
   const customerEmail = document.getElementById("customerEmail").textContent || "";
-  const subject = encodeURIComponent("KAYON STUDIO 報價合約 " + quoteNo);
-  const body = encodeURIComponent("您好，\n\n附件為報價合約（" + quoteNo + "）的已簽署 PDF 副本。\n請查收，謝謝。\n\nKAYON STUDIO\n鎧洋聲影科技工作室");
+  const quoteDate = document.getElementById("quoteDate").textContent;
+  const sealedAt = document.getElementById("utcTimestamp").textContent;
 
-  document.getElementById("btnMailKayon").onclick = function() {
-    window.open("mailto:kayon@karbonxgaiaentertainment.com?subject=" + subject + "&body=" + body);
-  };
-  if (customerEmail) {
-    document.getElementById("btnMailClient").onclick = function() {
-      window.open("mailto:" + encodeURIComponent(customerEmail) + "?subject=" + subject + "&body=" + body);
-    };
-  } else {
-    document.getElementById("btnMailClient").style.display = "none";
+  if (!APPS_SCRIPT_URL) {
+    document.getElementById("sealedTitle").textContent = "文件已封印完成";
+    document.getElementById("sealedStatus").textContent = "自動寄信尚未設定，請手動儲存 PDF";
+    return;
+  }
+
+  try {
+    document.getElementById("sealedTitle").textContent = "正在產生 PDF 並寄送...";
+    const el = document.getElementById("contract");
+    const pdfBlob = await html2pdf().set({
+      margin: [6, 8, 6, 8],
+      filename: "KAYON_STUDIO_" + quoteNo + ".pdf",
+      image: { type: "jpeg", quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["avoid-all"] }
+    }).from(el).outputPdf("datauristring");
+
+    const base64 = pdfBlob.split(",")[1];
+    const recipients = ["kayon@karbonxgaiaentertainment.com"];
+    if (customerEmail) recipients.push(customerEmail);
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        pdf: base64,
+        filename: "KAYON_STUDIO_" + quoteNo + ".pdf",
+        recipients: recipients,
+        subject: "KAYON STUDIO 報價合約 " + quoteNo + " — 已簽署",
+        quoteNo: quoteNo,
+        customerName: customerName,
+        quoteDate: quoteDate,
+        sealedAt: sealedAt
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById("sealedTitle").textContent = "文件已封印，Email 已寄出！";
+      document.getElementById("sealedStatus").textContent = "PDF 已寄送至：" + recipients.join("、");
+    } else {
+      throw new Error(result.error || "寄送失敗");
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById("sealedTitle").textContent = "文件已封印，但寄送失敗";
+    document.getElementById("sealedStatus").textContent = "請手動儲存 PDF 並寄送（" + err.message + "）";
   }
 }
 </script>
