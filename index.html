@@ -5,42 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KAYON STUDIO 報價合約</title>
 <style>
-  @page { size: A4; margin: 10mm; }
+  @page { size: A4; margin: 6mm 8mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; font-size: 13px; color: #222; background: #f0f0f0; }
   .page { width: 210mm; margin: 20px auto; padding: 20mm; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
   @media print {
-    body { background: #fff; }
-    .page { box-shadow: none; margin: 0; padding: 10mm; width: 100%; max-height: 277mm; overflow: hidden; }
+    body { background: #fff; font-size: 9px !important; }
+    .page { box-shadow: none; margin: 0; padding: 0; width: 100%; }
     .no-print { display: none !important; }
-    .header { margin-bottom: 8px !important; padding-bottom: 6px !important; }
-    .header img { max-height: 70px !important; margin-bottom: 6px !important; }
-    .info-grid { margin-bottom: 8px !important; }
-    .info-grid .col { padding: 4px 8px !important; }
-    .info-grid .section-title { padding: 3px 8px !important; font-size: 11px !important; }
-    .info-grid .label { font-size: 9px !important; margin-bottom: 1px !important; }
-    .info-grid .value { font-size: 11px !important; min-height: 14px !important; padding: 1px 0 !important; }
-    table.items { margin-bottom: 6px !important; }
-    table.items th, table.items td { padding: 3px 6px !important; font-size: 10px !important; }
-    .terms { margin-bottom: 6px !important; }
-    .terms h3 { font-size: 11px !important; margin-bottom: 4px !important; padding-bottom: 2px !important; }
-    .terms ol { font-size: 8px !important; line-height: 1.45 !important; padding-left: 14px !important; }
+    .header { margin-bottom: 4px !important; padding-bottom: 4px !important; border-bottom-width: 2px !important; }
+    .header img { max-height: 50px !important; margin-bottom: 4px !important; }
+    .header .subtitle { font-size: 9px !important; margin-top: 2px !important; }
+    .info-grid { margin-bottom: 4px !important; }
+    .info-grid .col { padding: 3px 6px !important; }
+    .info-grid .section-title { padding: 2px 6px !important; font-size: 9px !important; }
+    .info-grid .label { font-size: 8px !important; margin-bottom: 0 !important; margin-top: 2px !important; }
+    .info-grid .value { font-size: 9px !important; min-height: 12px !important; padding: 1px 0 !important; }
+    table.items { margin-bottom: 4px !important; }
+    table.items th, table.items td { padding: 2px 4px !important; font-size: 8.5px !important; }
+    .terms { margin-bottom: 4px !important; }
+    .terms h3 { font-size: 9px !important; margin-bottom: 2px !important; padding-bottom: 1px !important; }
+    .terms ol { font-size: 7px !important; line-height: 1.35 !important; padding-left: 12px !important; }
     .terms ol li { margin-bottom: 0 !important; }
-    .bottom-grid { gap: 6px !important; margin-bottom: 6px !important; }
-    .payment-box { padding: 4px 6px !important; font-size: 9px !important; line-height: 1.5 !important; }
-    .contractor { padding: 4px 6px !important; font-size: 9px !important; line-height: 1.5 !important; margin-top: 4px !important; }
-    .sig-section { margin-top: 6px !important; }
-    .sig-section h3 { font-size: 11px !important; margin-bottom: 4px !important; padding-bottom: 2px !important; }
-    .sig-agreement { font-size: 8px !important; margin-bottom: 4px !important; }
-    .sig-row { gap: 10px !important; }
-    .sig-block { padding: 6px !important; }
-    .sig-block .sig-title { font-size: 10px !important; margin-bottom: 4px !important; }
-    canvas.sig-pad, .sig-pad-container img.sig-preview { height: 40px !important; }
-    .seal-big { width: 50px !important; height: 50px !important; }
-    .seal-small { width: 35px !important; height: 35px !important; }
-    .seal-row { margin-top: 3px !important; gap: 6px !important; }
-    .sig-date-row { margin-top: 3px !important; font-size: 9px !important; }
-    .hash-section { margin-top: 6px !important; padding: 4px 6px !important; font-size: 8px !important; }
+    .bottom-grid { gap: 4px !important; margin-bottom: 4px !important; }
+    .payment-box { padding: 3px 5px !important; font-size: 8px !important; line-height: 1.4 !important; }
+    .payment-box .title { margin-bottom: 1px !important; }
+    .contractor { padding: 3px 5px !important; font-size: 8px !important; line-height: 1.4 !important; margin-top: 3px !important; }
+    .custom-notes { display: none !important; }
+    .sig-section { margin-top: 4px !important; page-break-inside: avoid !important; }
+    .sig-section h3 { font-size: 9px !important; margin-bottom: 2px !important; padding-bottom: 1px !important; }
+    .sig-agreement { font-size: 7px !important; margin-bottom: 2px !important; }
+    .sig-row { gap: 8px !important; }
+    .sig-block { padding: 4px !important; }
+    .sig-block .sig-title { font-size: 9px !important; margin-bottom: 2px !important; }
+    .sig-content { gap: 2px !important; }
+    canvas.sig-pad, .sig-pad-container img.sig-preview { height: 30px !important; }
+    .seal-big { width: 40px !important; height: 40px !important; }
+    .seal-small { width: 28px !important; height: 28px !important; }
+    .seal-box { font-size: 7px !important; }
+    .seal-row { margin-top: 2px !important; gap: 4px !important; }
+    .sig-date-row { margin-top: 2px !important; font-size: 8px !important; }
+    .hash-section { margin-top: 4px !important; padding: 3px 5px !important; font-size: 7px !important; }
   }
 
   .header { text-align: center; margin-bottom: 18px; border-bottom: 3px double #333; padding-bottom: 12px; }
