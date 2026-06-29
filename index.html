@@ -2,8 +2,14 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>KAYON STUDIO 報價合約</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="KS 報價">
+<meta name="theme-color" content="#4a86c8">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="kayon_logo.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 <style>
   @page { size: A4; margin: 6mm 8mm; }
@@ -89,6 +95,60 @@
 
   .mode-toggle { display: block; margin: 0 auto 10px; padding: 6px 20px; font-size: 12px; background: #f9f9f9; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
   .mode-toggle:hover { background: #eee; }
+
+  @media screen and (max-width: 800px) {
+    body { font-size: 14px; background: #fff; }
+    .page { width: 100%; margin: 0; padding: 16px; box-shadow: none; }
+    .no-print { width: 100% !important; padding: 8px 12px; }
+    .mode-toggle { font-size: 11px; padding: 8px 12px; }
+
+    .header img { max-height: 80px !important; margin-bottom: 8px !important; }
+    .header .subtitle { font-size: 10px; }
+
+    .info-grid { grid-template-columns: 1fr; }
+    .info-grid .col:first-child { border-right: none; border-bottom: 1px solid #999; }
+    .info-grid .section-title:nth-child(2) { display: none; }
+
+    table.items { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table.items thead { display: none; }
+    table.items tbody { display: block; }
+    table.items tr { display: flex; flex-wrap: wrap; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 8px; padding: 10px; gap: 4px; }
+    table.items td { border: none; padding: 4px 0; text-align: left; font-size: 13px; }
+    table.items tr td:nth-child(1) { width: 100%; font-weight: 600; }
+    table.items tr td:nth-child(2) { width: 100%; color: #666; font-size: 12px; }
+    table.items tr td:nth-child(3) { width: 33%; }
+    table.items tr td:nth-child(4) { width: 33%; text-align: center; }
+    table.items tr td:nth-child(5) { width: 33%; text-align: right; font-weight: 600; color: #4a86c8; }
+    table.items .discount-row td,
+    table.items .total-row td { width: 100% !important; text-align: right !important; }
+    table.items .discount-row,
+    table.items .total-row { flex-wrap: nowrap; justify-content: space-between; align-items: center; }
+    table.items tr:has(#invoiceCheck) { justify-content: space-between; align-items: center; }
+    table.items tr:has(#invoiceCheck) td { width: auto !important; }
+    table.items select, table.items input[type="number"] { font-size: 16px; }
+
+    .terms ol { font-size: 11px; padding-left: 16px; }
+
+    .bottom-grid { grid-template-columns: 1fr; gap: 10px; }
+
+    .sig-row { grid-template-columns: 1fr; gap: 16px; }
+    canvas.sig-pad { height: 150px; }
+    .seal-row { justify-content: center; }
+
+    .btn-finalize { font-size: 16px; padding: 14px 24px; width: 100%; }
+    .btn-print { font-size: 14px; padding: 10px 20px; width: 100%; }
+
+    .hash-section { font-size: 9px; }
+    .hash-section .hash-value { font-size: 8px; }
+
+    #discountSelect { width: 100% !important; font-size: 14px; }
+    #customDiscount { width: 100% !important; }
+    .qty-input { width: 60px !important; font-size: 16px !important; }
+    .item-select { width: 100%; font-size: 14px; }
+    .custom-item-name, .custom-desc, .custom-price { font-size: 14px !important; }
+    [contenteditable] { font-size: 16px; min-height: 28px; }
+    textarea#customNotes { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -984,6 +1044,10 @@ async function downloadPDF() {
   if (h > ph) { h = ph; w = ph * ratio; }
   pdf.addImage(imgData, "JPEG", mL + (pw - w) / 2, mT, w, h);
   pdf.save("KAYON_STUDIO_" + quoteNo + ".pdf");
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
 }
 </script>
 </body>
